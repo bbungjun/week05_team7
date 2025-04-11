@@ -2,7 +2,7 @@
 
 /* CE1007/CZ1007 Data Structures
 Lab Test: Section A - Linked List Questions
-Purpose: Implementing the required functions for Question 3 */
+Purpose: Implementing the required functions for Question 6 */
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +27,7 @@ typedef struct _linkedlist
 //////////////////////// function prototypes /////////////////////////////////////
 
 // You should not change the prototype of this function
-void moveOddItemsToBack(LinkedList *ll);
+int moveMaxToFront(ListNode **ptrHead);
 
 void printList(LinkedList *ll);
 void removeAllItems(LinkedList *ll);
@@ -35,20 +35,22 @@ ListNode * findNode(LinkedList *ll, int index);
 int insertNode(LinkedList *ll, int index, int value);
 int removeNode(LinkedList *ll, int index);
 
+
 //////////////////////////// main() //////////////////////////////////////////////
 
 int main()
 {
-	LinkedList ll;
 	int c, i, j;
 	c = 1;
+
+	LinkedList ll;
 	//Initialize the linked list 1 as an empty linked list
 	ll.head = NULL;
 	ll.size = 0;
 
 
 	printf("1: Insert an integer to the linked list:\n");
-	printf("2: Move all odd integers to the back of the linked list:\n");
+	printf("2: Move the largest stored value to the front of the list:\n");
 	printf("0: Quit:\n");
 
 	while (c != 0)
@@ -61,13 +63,13 @@ int main()
 		case 1:
 			printf("Input an integer that you want to add to the linked list: ");
 			scanf("%d", &i);
-			j = insertNode(&ll, ll.size, i);
+			j=insertNode(&ll, ll.size, i);
 			printf("The resulting linked list is: ");
 			printList(&ll);
 			break;
 		case 2:
-			moveOddItemsToBack(&ll); // You need to code this function
-			printf("The resulting linked list after moving odd integers to the back of the linked list is: ");
+			moveMaxToFront(&(ll.head));  // You need to code this function
+			printf("The resulting linked list after moving largest stored value to the front of the list is: ");
 			printList(&ll);
 			removeAllItems(&ll);
 			break;
@@ -82,57 +84,38 @@ int main()
 	return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 
-void moveOddItemsToBack(LinkedList *ll) 
+int moveMaxToFront(ListNode **ptrHead)
 {
-	/* add your code here */
-	if (ll == NULL)
-		return;
-	ListNode *cur = ll->head;
+    /* add your code here */
+	if (*ptrHead == NULL)
+		return -1;
+	ListNode *cur = *ptrHead;
 	ListNode *prev = NULL;
-	ListNode *oddH = NULL;
-	ListNode *oddT = NULL;
-
+	ListNode *prevMax = NULL;
+	int maxVal = 0;
 	while (cur != NULL) {
-		if (cur->item % 2 == 1) {
-			ListNode *tmp = cur;
-			if (prev == NULL) {
-				ll->head = cur->next;
-				cur = ll->head;
-			} else {
-				prev->next = cur->next;
-				cur = prev->next;
-			}
-			tmp->next = NULL;
-			if (oddH == NULL) {
-				oddH = tmp;
-				oddT = tmp; // 없으면 1 3 5에서 에러남
-			} else {
-				oddT->next = tmp;
-				oddT = tmp;
-			}
-			ll->size--;
-		} else {
-			prev = cur;
-			cur = cur->next;
+		if (cur->item > maxVal) {
+			maxVal = cur->item;
+			prevMax = prev;
 		}
+		prev = cur;
+		cur = cur->next;
 	}
 
-	if (prev == NULL) { // 모두 홀수인 경우
-		ll->head = oddH;
-	} else {
-		prev->next = oddH;
+	if (prevMax != NULL) {
+		cur = prevMax->next;
+		prevMax->next = cur->next;
+		cur->next = *ptrHead;
+		*ptrHead = cur;
+		return maxVal;
 	}
 
-	ListNode *odd = oddH;
-	while (odd != NULL) {
-		ll->size++;
-		odd = odd->next;
-	}
+	return -1;
 }
 
-///////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 void printList(LinkedList *ll){
 
@@ -151,23 +134,7 @@ void printList(LinkedList *ll){
 	printf("\n");
 }
 
-
-void removeAllItems(LinkedList *ll)
-{
-	ListNode *cur = ll->head;
-	ListNode *tmp;
-
-	while (cur != NULL){
-		tmp = cur->next;
-		free(cur);
-		cur = tmp;
-	}
-	ll->head = NULL;
-	ll->size = 0;
-}
-
-
-ListNode *findNode(LinkedList *ll, int index){
+ListNode * findNode(LinkedList *ll, int index){
 
 	ListNode *temp;
 
@@ -255,4 +222,18 @@ int removeNode(LinkedList *ll, int index){
 	}
 
 	return -1;
+}
+
+void removeAllItems(LinkedList *ll)
+{
+	ListNode *cur = ll->head;
+	ListNode *tmp;
+
+	while (cur != NULL){
+		tmp = cur->next;
+		free(cur);
+		cur = tmp;
+	}
+	ll->head = NULL;
+	ll->size = 0;
 }
