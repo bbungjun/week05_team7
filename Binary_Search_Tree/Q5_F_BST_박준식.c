@@ -54,12 +54,13 @@ int main()
 
 	printf("1: Insert an integer into the binary search tree;\n");
 	printf("2: Print the post-order traversal of the binary search tree;\n");
+	printf("3: Delete key from the binary search tree;\n");
 	printf("0: Quit;\n");
 
 
 	while (c != 0)
 	{
-		printf("Please input your choice(1/2/0): ");
+		printf("Please input your choice(1/2/3/0): ");
 		scanf("%d", &c);
 
 		switch (c)
@@ -73,6 +74,11 @@ int main()
 			printf("The resulting post-order traversal of the binary search tree is: ");
 			postOrderIterativeS2(root); // You need to code this function
 			printf("\n");
+			break;
+		case 3:
+			printf("Input an integer that you want to remove from the Binary Search Tree: ");
+			scanf("%d", &i);
+			removeNodeFromTree(root, i);
 			break;
 		case 0:
 			removeAll(&root);
@@ -130,7 +136,40 @@ void postOrderIterativeS2(BSTNode *root)
 BSTNode* removeNodeFromTree(BSTNode *root, int value)
 {
 	/* add your code here */
+	if (root == NULL) return NULL;
+
+	if (value < root->item) root->left = removeNodeFromTree(root->left, value);
+	else if (value > root->item) root->right = removeNodeFromTree(root->right, value);
+	else {
+		// 1. If deleting the leaf node
+		if (root->left == NULL && root->right == NULL) {
+			free(root);
+			return NULL;
+		}
+		// 2. If deleting the root of subtree with 1 child
+		else if (root->left != NULL && root->right == NULL) {
+			BSTNode *tmp = root->left;
+			free(root);
+			return tmp;
+		}
+		else if (root->left == NULL && root->right != NULL) {
+			BSTNode *tmp = root->right;
+			free(root);
+			return tmp;
+		}
+		// 3. If deleting the root of subtree with 2 children
+		else {
+			BSTNode* minNode = root->right;
+            while (minNode->left != NULL) {
+                minNode = minNode->left;
+            }
+            root->item = minNode->item;
+            root->right = removeNodeFromTree(root->right, minNode->item);
+		}
+	}
+	return root;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void insertBSTNode(BSTNode **node, int value){
