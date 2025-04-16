@@ -90,9 +90,51 @@ int main()
 
 int insertSortedLL(LinkedList *ll, int item)
 {
-	/* add your code here */
+    // 현재 노드와 이전 노드를 추적하기 위한 포인터
+    ListNode *cur, *prev;
+    int index = 0;  // 삽입될 위치의 인덱스
+    
+    // 리스트가 NULL인지 확인
+    if (ll == NULL)
+        return -1;
+    
+    // 현재 노드를 헤드로 초기화
+    cur = ll->head;
+    prev = NULL;
+    
+    // 리스트를 순회하면서 적절한 삽입 위치 찾기
+    while (cur != NULL && cur->item < item) {
+        prev = cur;
+        cur = cur->next;
+        index++;  // 인덱스 증가
+    }
+    
+    // 이미 리스트에 해당 값이 존재하는지 확인
+    if (cur != NULL && cur->item == item)
+        return -1;  // 중복 값은 삽입하지 않음
+    
+    // 새 노드 생성
+    ListNode *newNode = (ListNode *)malloc(sizeof(ListNode));
+    if (newNode == NULL)
+        return -1;  // 메모리 할당 실패
+    
+    newNode->item = item;
+    newNode->next = cur;  // 새 노드는 현재 노드를 가리킴
+    
+    // 삽입 위치에 따라 리스트 연결 갱신
+    if (prev == NULL) {
+        // 삽입 위치가 리스트의 맨 앞인 경우
+        ll->head = newNode;
+    } else {
+        // 삽입 위치가 리스트의 중간이나 끝인 경우
+        prev->next = newNode;
+    }
+    
+    // 리스트 크기 증가
+    ll->size++;
+    
+    return index;  // 삽입된 인덱스 반환
 }
-
 ///////////////////////////////////////////////////////////////////////////////////
 
 void printList(LinkedList *ll){
