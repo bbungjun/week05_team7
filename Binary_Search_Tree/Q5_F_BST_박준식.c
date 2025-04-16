@@ -99,9 +99,9 @@ void postOrderIterativeS2(BSTNode *root)
 {
 	/* add your code here */
 	if (root == NULL) return;
-	Stack stack;
+	Stack stack; // 후위 순회 출력용 스택
 	stack.top = NULL;
-	Stack roots;
+	Stack roots; // 루트 관리용 스택
 	roots.top = NULL;
 
 	BSTNode *cur;
@@ -109,22 +109,13 @@ void postOrderIterativeS2(BSTNode *root)
 
 	while(!isEmpty(&roots)) {
 		cur = pop(&roots);
-		if (cur->left == NULL && cur->right == NULL) push(&stack, cur);
-		else {
-			BSTNode *tmp = malloc(sizeof(BSTNode));
-			if (tmp != NULL) {
-				tmp->item = cur->item;
-				tmp->left = NULL;
-				tmp->right = NULL;
-				push(&stack, tmp);
-			}
-		}
+		push(&stack, cur); // 루트-오른쪽 자식-왼쪽 자식 순으로 stack에 push됨
 		if (cur->left != NULL) push(&roots, cur->left);
-		if (cur->right != NULL) push(&roots, cur->right);
+		if (cur->right != NULL) push(&roots, cur->right); // 오른쪽 자식을 왼쪽 자식보다 먼저 roots에서 pop해서 결과적으로 stack에서는 왼쪽 자식보다 나중에 pop됨
 	}
 
 	while(!isEmpty(&stack)) {
-		cur = pop(&stack);
+		cur = pop(&stack); // 왼쪽 자식-오른쪽 자식-루트 순으로 pop됨
 		printf("%d ", cur->item);
 	}
 
@@ -137,37 +128,36 @@ BSTNode* removeNodeFromTree(BSTNode *root, int value)
 {
 	/* add your code here */
 	if (root == NULL) return NULL;
-
-	if (value < root->item) root->left = removeNodeFromTree(root->left, value);
-	else if (value > root->item) root->right = removeNodeFromTree(root->right, value);
-	else {
-		// 1. If deleting the leaf node
-		if (root->left == NULL && root->right == NULL) {
-			free(root);
-			return NULL;
-		}
-		// 2. If deleting the root of subtree with 1 child
-		else if (root->left != NULL && root->right == NULL) {
-			BSTNode *tmp = root->left;
-			free(root);
-			return tmp;
-		}
-		else if (root->left == NULL && root->right != NULL) {
-			BSTNode *tmp = root->right;
-			free(root);
-			return tmp;
-		}
-		// 3. If deleting the root of subtree with 2 children
-		else {
-			BSTNode* minNode = root->right;
-            while (minNode->left != NULL) {
-                minNode = minNode->left;
-            }
-            root->item = minNode->item;
-            root->right = removeNodeFromTree(root->right, minNode->item);
-		}
-	}
-	return root;
+    
+    if (value < root->item) root->left = removeNodeFromTree(root->left, value);
+    else if (value > root->item) root->right = removeNodeFromTree(root->right, value);
+    else {
+        // Case 1. 리프 노드를 제거하는 경우
+        if (root->left == NULL && root->right == NULL) {
+            free(root);
+            return NULL; // 부모의 왼쪽/오른쪽 포인터를 NULL로 한다.
+        }
+        // Case 2. 자식이 1개 있는 노드를 제거하는 경우
+        else if (root->left != NULL && root->right == NULL) {
+            BSTNode *tmp = root->left;
+            free(root);
+            return tmp; // 부모의 왼쪽/오른쪽 포인터를 삭제할 노드의 (왼쪽) 자식으로 업데이트한다.
+        }
+        else if (root->left == NULL && root->right != NULL) {
+            BSTNode *tmp = root->right;
+            free(root);
+            return tmp; // 부모의 왼쪽/오른쪽 포인터를 삭제할 노드의 (오른쪽) 자식으로 업데이트한다.
+        }
+        // Case 3. 자식이 2개 있는 노드를 제거하는 경우
+        else {
+            BSTNode* predecessor = root->left;
+            while (predecessor->right != NULL) predecessor = predecessor->right; // 삭제할 노드의 선임자(작은 값들중 최대값)를 찾는다.
+            root->item = predecessor->item; // 선임자의 노드의 데이터를 삭제할 노드의 위치에 복사한다.
+            root->left = removeNodeFromTree(root->left, predecessor->item); // 옮긴 노드를 삭제한다.
+			// 옮긴 노드에 자식이 없으면 Case 1, 자식이 1개만 있으면 Case 2에 따라 노드를 삭제한다.
+        }
+    }
+    return root;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
