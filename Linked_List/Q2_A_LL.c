@@ -103,9 +103,65 @@ int main()
 
 void alternateMergeLinkedList(LinkedList *ll1, LinkedList *ll2)
 {
-    /* add your code here */
+    // 예외 처리: 입력 리스트가 NULL이거나 ll2가 비어있으면 작업할 필요 없음
+    if (ll1 == NULL || ll2 == NULL || ll2->head == NULL)
+        return;
+    
+    // ll1이 비어있는 경우, ll2의 내용을 ll1으로 이동
+    if (ll1->head == NULL) {
+        ll1->head = ll2->head;
+        ll1->size = ll2->size;
+        ll2->head = NULL;
+        ll2->size = 0;
+        return;
+    }
+    
+    ListNode *cur1 = ll1->head;    // ll1의 현재 노드
+    ListNode *next1;               // ll1의 다음 노드 저장용
+    ListNode *cur2 = ll2->head;    // ll2의 현재 노드
+    ListNode *next2;               // ll2의 다음 노드 저장용
+    
+    // ll1의 노드 사이에 ll2의 노드를 삽입
+    while (cur1 != NULL && cur2 != NULL) {
+        // 다음 순회를 위해 다음 노드 저장
+        next1 = cur1->next;
+        next2 = cur2->next;
+        
+        // ll2의 현재 노드를 ll1의 현재 노드 다음에 삽입
+        cur2->next = next1;
+        cur1->next = cur2;
+        
+        // ll1 리스트를 따라 한 노드 더 이동 (방금 삽입한 노드를 건너뛰기 위해)
+        cur1 = next1;
+        
+        // ll2의 다음 노드로 이동
+        cur2 = next2;
+    }
+    
+    // ll2에서 사용한 노드 수 계산 (원래 크기 - 남은 노드 수)
+    int nodesUsed = ll2->size;
+    if (cur2 != NULL) {
+        // 남은 노드 세기
+        ListNode *temp = cur2;
+        int remainingNodes = 0;
+        while (temp != NULL) {
+            remainingNodes++;
+            temp = temp->next;
+        }
+        nodesUsed -= remainingNodes;
+        
+        // ll2의 head를 남은 노드로 조정
+        ll2->head = cur2;
+        ll2->size = remainingNodes;
+    } else {
+        // ll2의 모든 노드를 사용했으면 비어있는 상태로 만듦
+        ll2->head = NULL;
+        ll2->size = 0;
+    }
+    
+    // ll1의 크기 업데이트 (기존 크기 + 사용된 ll2의 노드 수)
+    ll1->size += nodesUsed;
 }
-
 ///////////////////////////////////////////////////////////////////////////////////
 
 void printList(LinkedList *ll){
